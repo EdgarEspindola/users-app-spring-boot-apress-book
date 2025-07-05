@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsersController {
     private Map<String, User> users = new HashMap<>() {
         {
-            put("ximena@email.com", new User("ximena@email.com", "Ximena"));
-            put("norma@email.com", new User("norma@email.com", "Norma"));
+            put("ximena@email.com", User.builder().email("ximena@email.com").name("Ximena").build());
+            put("norma@email.com", User.builder().email("norma@email.com").name("Norma").build());
         }
     };
 
