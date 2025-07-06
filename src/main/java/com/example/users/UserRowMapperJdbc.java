@@ -10,15 +10,15 @@ import java.util.stream.Collectors;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.lang.Nullable;
 
-public class UserRowMapperJdbc implements RowMapper<User> {
+public class UserRowMapperJdbc implements RowMapper<UserWithJdbcTemplate> {
 
     @Override
     @Nullable
-    public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public UserWithJdbcTemplate mapRow(ResultSet rs, int rowNum) throws SQLException {
         Array array = rs.getArray("user_role");
         String[] rolesArray = Arrays.copyOf((Object[])array.getArray(), ((Object[])array.getArray()).length, String[].class);
         List<UserRole> roles = Arrays.stream(rolesArray).map(UserRole::valueOf).collect(Collectors.toList());
-        User newUser = User.builder()
+        UserWithJdbcTemplate newUser = UserWithJdbcTemplate.builder()
             .id(rs.getInt("id"))
             .name(rs.getString("name"))
             .email(rs.getString("email"))

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class UserConfiguration {
     @Bean
-    ApplicationListener<ApplicationReadyEvent> init(SimpleRepository<User, Integer> userRepository) {
+    ApplicationListener<ApplicationReadyEvent> init(UserRepository userRepository) {
         return applicationReadyEvent -> {
             User ximena = User.builder()
                             .email("ximena@email.com")

@@ -17,25 +17,25 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @Repository
-public class UserRepositoryJdbcTemplate implements SimpleRepository<User, Integer> {
+public class UserRepositoryJdbcTemplate implements SimpleRepository<UserWithJdbcTemplate, Integer> {
     private JdbcTemplate jdbcTemplate;
 
     @Override
-    public Optional<User> findById(Integer id) {
+    public Optional<UserWithJdbcTemplate> findById(Integer id) {
         String sql = "SELECT * FROM users WHERE id = ?";
         Object[] params = new Object[] {id};
-        User user = jdbcTemplate.queryForObject(sql, params, new int[] {Types.INTEGER}, new UserRowMapperJdbc());
+        UserWithJdbcTemplate user = jdbcTemplate.queryForObject(sql, params, new int[] {Types.INTEGER}, new UserRowMapperJdbc());
         return Optional.ofNullable(user);
     }
 
     @Override
-    public Iterable<User> findAll() {
+    public Iterable<UserWithJdbcTemplate> findAll() {
         String sql = "SELECT * FROM users";
         return this.jdbcTemplate.query(sql, new UserRowMapperJdbc());
     }
 
     @Override
-    public User save(User user) {
+    public UserWithJdbcTemplate save(UserWithJdbcTemplate user) {
         String sql = "INSERT INTO users(name, email, password, gravatar_url, user_role, active) VALUES(?, ?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -49,7 +49,7 @@ public class UserRepositoryJdbcTemplate implements SimpleRepository<User, Intege
             ps.setBoolean(6, user.active());
             return ps;
         }, keyHolder);
-        User userCreated = user.withId((Integer)keyHolder.getKeys().get("id"));
+        UserWithJdbcTemplate userCreated = user.withId((Integer)keyHolder.getKeys().get("id"));
         return userCreated;
     }
 

@@ -29,33 +29,33 @@ import lombok.AllArgsConstructor;
 @RestController
 @RequestMapping("/users")
 public class UsersController {
-    private SimpleRepository<User,Integer> userRepository;
+    private UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<Iterable<User>> getAll(){
         return ResponseEntity.ok(this.userRepository.findAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> findUserById(@PathVariable Integer id){
-        return ResponseEntity.of(this.userRepository.findById(id));
+    @GetMapping("/{email}")
+    public ResponseEntity<User> findUserByEmail(@PathVariable String email) {
+        return ResponseEntity.of(this.userRepository.findByEmail(email));
     }
 
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<User> save(@RequestBody @Valid User user){
-       User result = this.userRepository.save(user);
+        User result = this.userRepository.save(user);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(user)
+                .path("/{email}")
+                .buildAndExpand(result.getEmail())
                 .toUri();
-        return ResponseEntity.created(location).body(this.userRepository.findById(result.id()).get());
+        return ResponseEntity.created(location).body(this.userRepository.findByEmail(result.getEmail()).get());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{email}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Integer id){
-        this.userRepository.deleteById(id);
+    public void delete(@PathVariable String email){
+        this.userRepository.deleteByEmail(email);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
