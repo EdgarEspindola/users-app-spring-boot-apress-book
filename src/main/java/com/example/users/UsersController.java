@@ -1,45 +1,83 @@
 package com.example.users;
 
-import java.util.Collection;
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UsersController {
-    private Map<String, User> users = new HashMap<>() {
-        {
-            put("ximena@email.com", User.builder().email("ximena@email.com").name("Ximena").build());
-            put("norma@email.com", User.builder().email("norma@email.com").name("Norma").build());
-        }
-    };
+    private SimpleRepository<User,Integer> userRepository;
 
     @GetMapping
-    public Collection<User> getAll() {
-        return this.users.values();
+    public ResponseEntity<Iterable<User>> getAll(){
+        return ResponseEntity.ok(this.userRepository.findAll());
     }
 
-    @GetMapping("/{email}")
-    public User findUserByEmail(@PathVariable String email) {
-        return this.users.get(email);
+    @GetMapping("/{id}")
+    public ResponseEntity<User> findUserById(@PathVariable Integer id){
+        return ResponseEntity.of(this.userRepository.findById(id));
     }
 
-    @PostMapping
-    public User save(@RequestBody User user) {
-        this.users.put(user.getEmail(), user);
-        return user;
+    @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
+    public ResponseEntity<User> save(@RequestBody @Valid User user){
+       User result = this.userRepository.save(user);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(user)
+                .toUri();
+        return ResponseEntity.created(location).body(this.userRepository.findById(result.id()).get());
     }
 
-    @DeleteMapping("/{email}")
-    public void save(@PathVariable String email) {
-        this.users.remove(email);
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Integer id){
+        this.userRepository.deleteById(id);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        errors.put("time", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        return errors;
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String,Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex){
+        Map<String,Object> errors = new HashMap<>();
+        errors.put("code",HttpStatus.BAD_REQUEST.value());
+        errors.put("message",ex.getMessage());
+        errors.put("time", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        return errors;
     }
 }

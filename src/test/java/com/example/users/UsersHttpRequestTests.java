@@ -1,10 +1,9 @@
 package com.example.users;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Collection;
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,54 +23,63 @@ public class UsersHttpRequestTests {
     private TestRestTemplate restTemplate;
 
     @Test
-    public void indexPageShoulReturnHeaderOneContent() {
-        assertThat(this.restTemplate.getForObject(BASE_URL + port, String.class)).contains("Simple Users Rest Application");
+    public void indexPageShouldReturnHeaderOneContent() throws Exception {
+        assertThat(this.restTemplate.getForObject(BASE_URL + port,
+                String.class)).contains("Simple Users Rest Application");
     }
-
+    
     @Test
     public void usersEndPointShouldReturnCollectionWithTwoUsers() throws Exception {
-        Collection<User> response = this.restTemplate.
-                getForObject(BASE_URL + port + USERS_PATH, Collection.class);
-        assertThat(response).isNotNull();
-        assertThat(response).isNotEmpty();
+        Collection<User> response = this.restTemplate
+            .getForObject(BASE_URL + port + USERS_PATH, Collection.class);
+        assertThat(response.size()).isGreaterThan(1);
     }
 
     @Test
-    public void userEndPointPostNewUserShouldReturnUser() {
-        User user = User.builder().email("dummy@email.com").name("Dummy").password("password").build();
-        User response = this.restTemplate.postForObject(BASE_URL + port + USERS_PATH, user, User.class);
-        assertThat(response).isNotNull();
-        assertThat(response.getEmail()).isEqualTo(user.getEmail());
+    public void shouldReturnErrorWhenPostBadUserForm() throws Exception {
+        assertThatThrownBy(() -> {
+            User user =  User.builder()
+                    .email("bademail")
+                    .name("Dummy")
+                    .active(true)
+                    .password("aw2s0")
+                    .build();
+        }).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Password must be at least 8 characters long and contain at least one number, one uppercase, one lowercase and one special character");
+    }
 
-        Collection<User> users = this.restTemplate.getForObject(BASE_URL + port + USERS_PATH, Collection.class);
+    @Test
+    public void userEndPointPostNewUserShouldReturnUser() throws Exception {
+        User user =  User.builder()
+                .email("dummy@email.com")
+                .name("Dummy")
+                .password("aw2s0meR!")
+                .active(true)
+                .role(UserRole.USER)
+                .build();
+        User response =  this.restTemplate.postForObject(BASE_URL + port + USERS_PATH,user,User.class);
+        assertThat(response).isNotNull();
+        assertThat(response.email()).isEqualTo(user.email());
+        
+        Collection<User> users = this.restTemplate.
+                getForObject(BASE_URL + port + USERS_PATH, Collection.class);
         assertThat(users.size()).isGreaterThanOrEqualTo(2);
     }
 
     @Test
-    public void userEndPointDeleteUserShouldReturnVoid() {
+    public void userEndPointDeleteUserShouldReturnVoid() throws Exception {
         this.restTemplate.delete(BASE_URL + port + USERS_PATH + "/norma@email.com");
-        
-        Collection<User> users = this.restTemplate.getForObject(BASE_URL + port + USERS_PATH, Collection.class);
+       
+        Collection<User> users = this.restTemplate.
+                getForObject(BASE_URL + port + USERS_PATH, Collection.class);
         assertThat(users.size()).isLessThanOrEqualTo(2);
     }
 
     @Test
     public void userEndPointFindUserShouldReturnUser() throws Exception{
-        User user = this.restTemplate.getForObject(BASE_URL + port + USERS_PATH + "/ximena@email.com",User.class);
+        User user = this.restTemplate.getForObject(BASE_URL + port + USERS_PATH + "/1",User.class);
         assertThat(user).isNotNull();
-        assertThat(user.getEmail()).isEqualTo("ximena@email.com");
-    }
-
-    @Test
-    public void userEndPointPostNewUserShouldReturnBadUserResponse() {
-        User user = User.builder().email("dummy@email.com").name("Dummy").password("password").build();
-        Map<String, Object> response = this.restTemplate.postForObject(BASE_URL + port + USERS_PATH, user, Map.class);
-        assertThat(response).isNotNull();
-        assertThat(response.get("errors")).isNotNull();
-        
-        Map<String, Object> errors = (Map) response.get("errors");
-        assertThat(errors.get("password")).isNotNull();
-        assertThat(errors.get("password")).isEqualTo("Password must be at least 8 characters long and contain at least one number, one uppercase, one lowercase and one special character");
+        assertThat(user.email()).isEqualTo("ximena@email.com");
     }
 
 }
