@@ -7,10 +7,10 @@ import org.springframework.data.relational.core.mapping.event.BeforeSaveCallback
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserBeforeSaveCallback implements BeforeSaveCallback<User> {
+public class UserBeforeSaveCallback implements BeforeSaveCallback<UserDataJdbc> {
 
     @Override
-    public User onBeforeSave(User aggregate, MutableAggregateChange<User> aggregateChange) {
+    public UserDataJdbc onBeforeSave(UserDataJdbc aggregate, MutableAggregateChange<UserDataJdbc> aggregateChange) {
         if (aggregate.getGravatarUrl()==null)
             aggregate.setGravatarUrl(UserGravatar.getGravatarUrlFromEmail(aggregate.getEmail()));
         if (aggregate.getUserRole() == null)

@@ -1,2 +1,12 @@
 GET http://localhost:8082/users
 Content-Type: application/json
+
+### Save user
+POST http://localhost:8082/users 
+Content-Type: application/json
+
+{
+    "name": "Test",
+    "email": "email@email.com",
+    "password": "aw2s0meR!"
+}
