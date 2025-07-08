@@ -33,19 +33,6 @@ public class UsersHttpRequestTests {
         assertThat(response.size()).isGreaterThanOrEqualTo(2);
     }
 
-    // @Test
-    // public void shouldReturnErrorWhenPostBadUserForm() throws Exception {
-    //     assertThatThrownBy(() -> {
-    //         UserWithJdbcTemplate user =  UserWithJdbcTemplate.builder()
-    //                 .email("bademail")
-    //                 .name("Dummy")
-    //                 .active(true)
-    //                 .password("aw2s0")
-    //                 .build();
-    //     }).isInstanceOf(IllegalArgumentException.class)
-    //             .hasMessageContaining("Password must be at least 8 characters long and contain at least one number, one uppercase, one lowercase and one special character");
-    // }
-
     @Test
     public void userEndPointPostNewUserShouldReturnUser() throws Exception {
         User user =  User.builder()

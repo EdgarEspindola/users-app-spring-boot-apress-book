@@ -3,6 +3,7 @@ package com.example.users;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,24 +39,30 @@ public class UsersController {
 
     @GetMapping("/{email}")
     public ResponseEntity<User> findUserByEmail(@PathVariable String email) {
-        return ResponseEntity.of(this.userRepository.findByEmail(email));
+        return ResponseEntity.of(this.userRepository.findById(email));
     }
 
     @RequestMapping(method = {RequestMethod.POST, RequestMethod.PUT})
     public ResponseEntity<User> save(@RequestBody @Valid User user){
+        if (user.getGravatarUrl()==null)
+            user.setGravatarUrl(UserGravatar.getGravatarUrlFromEmail(user.getEmail()));
+        if (user.getUserRole()==null)
+            user.setUserRole(Collections.singleton(UserRole.INFO));
+
+
         User result = this.userRepository.save(user);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{email}")
                 .buildAndExpand(result.getEmail())
                 .toUri();
-        return ResponseEntity.created(location).body(this.userRepository.findByEmail(result.getEmail()).get());
+        return ResponseEntity.created(location).body(result);
     }
 
     @DeleteMapping("/{email}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String email){
-        this.userRepository.deleteByEmail(email);
+        this.userRepository.deleteById(email);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

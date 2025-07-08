@@ -1,28 +1,20 @@
 package com.example.users;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
+
 import jakarta.validation.constraints.*;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Singular;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import lombok.*;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Entity(name="USERS")
+@RedisHash("USERS")
 public class User {
-
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id;
-
     @NotBlank(message = "Email can not be empty")
     private String email;
 
@@ -31,21 +23,11 @@ public class User {
 
     private String gravatarUrl;
 
-    @Pattern(message = "Password must be at least 8 characters long and contain at least one number, one uppercase, one lowercase and one special character",
-            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$")
+    @NotBlank(message = "Password can not be empty")
     private String password;
 
     @Singular("role")
-    private List<UserRole> userRole;
-
-    private boolean active;
-
-    @PrePersist
-    private void prePersist(){
-    if (this.gravatarUrl == null)
-        this.gravatarUrl = UserGravatar.getGravatarUrlFromEmail(this.email);
+    private Collection<UserRole> userRole;
     
-    if(this.userRole == null)
-        this.userRole = Collections.singletonList(UserRole.INFO);
-    }
+    private boolean active;
 }
