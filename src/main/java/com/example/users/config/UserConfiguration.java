@@ -1,9 +1,13 @@
-package com.example.users;
+package com.example.users.config;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.example.users.model.User;
+import com.example.users.model.UserRole;
+import com.example.users.repository.UserRepository;
 
 import lombok.extern.slf4j.Slf4j;
 

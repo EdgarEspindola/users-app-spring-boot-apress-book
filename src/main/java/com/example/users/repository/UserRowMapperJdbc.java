@@ -1,4 +1,4 @@
-package com.example.users;
+package com.example.users.repository;
 
 import java.sql.Array;
 import java.sql.ResultSet;
@@ -9,6 +9,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.lang.Nullable;
+
+import com.example.users.model.UserRole;
+import com.example.users.model.UserWithJdbcTemplate;
 
 public class UserRowMapperJdbc implements RowMapper<UserWithJdbcTemplate> {
 

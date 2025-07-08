@@ -1,4 +1,4 @@
-package com.example.users;
+package com.example.users.web;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -22,6 +22,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.example.users.model.User;
+import com.example.users.model.UserGravatar;
+import com.example.users.model.UserRole;
+import com.example.users.repository.UserRepository;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

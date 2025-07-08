@@ -1,5 +1,9 @@
 package com.example.users;
 
+import com.example.users.model.User;
+import com.example.users.model.UserRole;
+import com.example.users.repository.UserRepository;
+import com.example.users.web.UsersController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.h2.engine.UserBuilder;

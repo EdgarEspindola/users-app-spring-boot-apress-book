@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 
+import com.example.users.model.User;
+import com.example.users.model.UserRole;
+import com.example.users.model.UserWithJdbcTemplate;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UsersHttpRequestTests {
-    @Value("${local.server.port}")
-    private int port;
-
-    private final String BASE_URL = "http://localhost:";
+   
     private final String USERS_PATH = "/users";
 
     @Autowired
@@ -22,15 +23,16 @@ public class UsersHttpRequestTests {
 
     @Test
     public void indexPageShouldReturnHeaderOneContent() throws Exception {
-        assertThat(this.restTemplate.getForObject(BASE_URL + port,
-                String.class)).contains("Simple Users Rest Application");
+        String html = this.restTemplate.withBasicAuth("manager@email.com","aw2s0meR!").getForObject("/", String.class);
+        assertThat(html).contains("Simple Users Rest Application");
     }
     
     @Test
     public void usersEndPointShouldReturnCollectionWithTwoUsers() throws Exception {
         Collection<User> response = this.restTemplate
-            .getForObject(BASE_URL + port + USERS_PATH, Collection.class);
-        assertThat(response.size()).isGreaterThanOrEqualTo(2);
+            .withBasicAuth("manager@email.com","aw2s0meR!")
+            .getForObject(USERS_PATH, Collection.class);
+        assertThat(response.size()).isGreaterThan(1);
     }
 
     @Test
@@ -43,27 +45,38 @@ public class UsersHttpRequestTests {
                 .active(true)
                 .role(UserRole.USER)
                 .build();
-        User response =  this.restTemplate.postForObject(BASE_URL + port + USERS_PATH,user,User.class);
+        User response =  this.restTemplate
+            .withBasicAuth("manager@email.com","aw2s0meR!")
+            .postForObject(USERS_PATH,user,User.class);
+
         assertThat(response).isNotNull();
         assertThat(response.getEmail()).isEqualTo(user.getEmail());
         
-        Collection<User> users = this.restTemplate.
-                getForObject(BASE_URL + port + USERS_PATH, Collection.class);
+        Collection<User> users = this.restTemplate
+                .withBasicAuth("manager@email.com","aw2s0meR!")
+                .getForObject(USERS_PATH, Collection.class);
+
         assertThat(users.size()).isGreaterThanOrEqualTo(2);
     }
 
     @Test
     public void userEndPointDeleteUserShouldReturnVoid() throws Exception {
-        this.restTemplate.delete(BASE_URL + port + USERS_PATH + "/norma@email.com");
+        this.restTemplate
+            .withBasicAuth("manager@email.com","aw2s0meR!")
+            .delete(USERS_PATH + "/norma@email.com");
        
-        Collection<UserWithJdbcTemplate> users = this.restTemplate.
-                getForObject(BASE_URL + port + USERS_PATH, Collection.class);
+        Collection<UserWithJdbcTemplate> users = this.restTemplate
+            .withBasicAuth("manager@email.com","aw2s0meR!")    
+            .getForObject(USERS_PATH, Collection.class);
+
         assertThat(users.size()).isLessThanOrEqualTo(2);
     }
 
     @Test
     public void userEndPointFindUserShouldReturnUser() throws Exception{
-        User user = this.restTemplate.getForObject(BASE_URL + port + USERS_PATH + "/ximena@email.com",User.class);
+        User user = this.restTemplate
+            .withBasicAuth("manager@email.com","aw2s0meR!")
+            .getForObject(USERS_PATH + "/ximena@email.com",User.class);
         assertThat(user).isNotNull();
         assertThat(user.getEmail()).isEqualTo("ximena@email.com");
     }

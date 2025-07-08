@@ -11,6 +11,12 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Import;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.example.users.config.UserConfiguration;
+import com.example.users.model.User;
+import com.example.users.model.UserRole;
+import com.example.users.repository.UserRepository;
+
 import org.testcontainers.junit.jupiter.Container;
 
 @Import({UserConfiguration.class})
